@@ -1,6 +1,7 @@
-package com.unigrad.funiverseauthenservice.config;
+package com.unigrad.funiverseauthenservice.security.services;
 
-import com.unigrad.funiverseauthenservice.user.UserRepository;
+
+import com.unigrad.funiverseauthenservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +22,7 @@ public class ApplicationConfig {
 
   @Bean
   public UserDetailsService userDetailsService() {
-    return username -> repository.findByEmail(username)
+    return username -> repository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 

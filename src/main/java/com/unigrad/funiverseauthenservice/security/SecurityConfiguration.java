@@ -1,5 +1,6 @@
-package com.unigrad.funiverseauthenservice.config;
+package com.unigrad.funiverseauthenservice.security;
 
+import com.unigrad.funiverseauthenservice.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

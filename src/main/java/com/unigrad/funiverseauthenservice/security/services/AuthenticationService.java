@@ -1,10 +1,12 @@
-package com.unigrad.funiverseauthenservice.auth;
+package com.unigrad.funiverseauthenservice.security.services;
 
 
-import com.unigrad.funiverseauthenservice.config.JwtService;
-import com.unigrad.funiverseauthenservice.user.Role;
-import com.unigrad.funiverseauthenservice.user.User;
-import com.unigrad.funiverseauthenservice.user.UserRepository;
+import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
+import com.unigrad.funiverseauthenservice.domain.User;
+import com.unigrad.funiverseauthenservice.repository.UserRepository;
+import com.unigrad.funiverseauthenservice.payload.request.AuthenticationRequest;
+import com.unigrad.funiverseauthenservice.payload.request.RegisterRequest;
+import com.unigrad.funiverseauthenservice.payload.response.AuthenticationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,12 +23,11 @@ public class AuthenticationService {
 
   public AuthenticationResponse register(RegisterRequest request) {
     var user = User.builder()
-        .firstname(request.getFirstname())
-        .lastname(request.getLastname())
-        .email(request.getEmail())
+        .username(request.getUsername())
         .password(passwordEncoder.encode(request.getPassword()))
-        .role(Role.USER)
+        .tenantId((request.getTenantId()))
         .build();
+
     repository.save(user);
     var jwtToken = jwtService.generateToken(user);
     return AuthenticationResponse.builder()
@@ -37,11 +38,11 @@ public class AuthenticationService {
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-            request.getEmail(),
+            request.getUsername(),
             request.getPassword()
         )
     );
-    var user = repository.findByEmail(request.getEmail())
+    var user = repository.findByUsername(request.getUsername())
         .orElseThrow();
     var jwtToken = jwtService.generateToken(user);
     return AuthenticationResponse.builder()

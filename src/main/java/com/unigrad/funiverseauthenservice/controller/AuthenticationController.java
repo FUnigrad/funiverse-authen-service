@@ -1,5 +1,9 @@
-package com.unigrad.funiverseauthenservice.auth;
+package com.unigrad.funiverseauthenservice.controller;
 
+import com.unigrad.funiverseauthenservice.payload.request.AuthenticationRequest;
+import com.unigrad.funiverseauthenservice.payload.response.AuthenticationResponse;
+import com.unigrad.funiverseauthenservice.security.services.AuthenticationService;
+import com.unigrad.funiverseauthenservice.payload.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,5 +1,6 @@
-package com.unigrad.funiverseauthenservice.config;
+package com.unigrad.funiverseauthenservice.security.jwt;
 
+import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

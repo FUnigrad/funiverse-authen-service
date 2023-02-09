@@ -1,4 +1,4 @@
-package com.unigrad.funiverseauthenservice.auth;
+package com.unigrad.funiverseauthenservice.payload.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-
-  private String firstname;
-  private String lastname;
-  private String email;
+  private String username;
   private String password;
+  private String tenantId;
 }

@@ -1,4 +1,4 @@
-package com.unigrad.funiverseauthenservice.user;
+package com.unigrad.funiverseauthenservice.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+//@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,19 +21,14 @@ import java.util.List;
 public class User implements UserDetails {
 
   @Id
-  @GeneratedValue
-  private Integer id;
-  private String firstname;
-  private String lastname;
-  private String email;
+  private String username;
   private String password;
+  private String tenantId;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority(role.name()));
+    return List.of(new SimpleGrantedAuthority(tenantId));
   }
 
   @Override
@@ -43,7 +38,7 @@ public class User implements UserDetails {
 
   @Override
   public String getUsername() {
-    return email;
+    return username;
   }
 
   @Override
