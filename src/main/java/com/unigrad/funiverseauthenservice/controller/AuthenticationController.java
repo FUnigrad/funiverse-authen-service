@@ -1,5 +1,6 @@
 package com.unigrad.funiverseauthenservice.controller;
 
+
 import com.unigrad.funiverseauthenservice.payload.request.AuthenticationRequest;
 import com.unigrad.funiverseauthenservice.payload.response.AuthenticationResponse;
 import com.unigrad.funiverseauthenservice.security.services.AuthenticationService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
   private final AuthenticationService service;
+
 
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(

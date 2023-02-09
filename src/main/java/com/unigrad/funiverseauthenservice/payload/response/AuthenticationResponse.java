@@ -1,5 +1,6 @@
 package com.unigrad.funiverseauthenservice.payload.response;
 
+import com.unigrad.funiverseauthenservice.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,5 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationResponse {
-  private String token;
+  private String accessToken;
+
+  private final String type = "Bearer";
+
+  private String refreshToken;
+
+  private User user;
 }
