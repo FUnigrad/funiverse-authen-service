@@ -2,6 +2,7 @@ package com.unigrad.funiverseauthenservice.security.services;
 
 
 import com.unigrad.funiverseauthenservice.domain.RefreshToken;
+import com.unigrad.funiverseauthenservice.payload.request.LoginRequest;
 import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
 import com.unigrad.funiverseauthenservice.domain.User;
 import com.unigrad.funiverseauthenservice.repository.UserRepository;
@@ -46,23 +47,6 @@ public class AuthenticationService {
             .accessToken(jwtToken)
             .user(user)
             .refreshToken(refreshToken.getToken())
-        .build();
-  }
-
-  public AuthenticationResponse authenticate(AuthenticationRequest request) {
-    authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-            request.getUsername(),
-            request.getPassword()
-        )
-    );
-    var user = repository.findByUsername(request.getUsername())
-        .orElseThrow();
-    var jwtToken = jwtService.generateToken(user);
-    return AuthenticationResponse.builder()
-            .accessToken(jwtToken)
-            .user(user)
-            .refreshToken("test")
         .build();
   }
 }

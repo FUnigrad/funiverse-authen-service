@@ -1,12 +1,23 @@
 package com.unigrad.funiverseauthenservice.controller;
 
 
-import com.unigrad.funiverseauthenservice.payload.request.AuthenticationRequest;
+import com.unigrad.funiverseauthenservice.domain.RefreshToken;
+import com.unigrad.funiverseauthenservice.domain.User;
+import com.unigrad.funiverseauthenservice.exception.TokenRefreshException;
+import com.unigrad.funiverseauthenservice.payload.request.*;
 import com.unigrad.funiverseauthenservice.payload.response.AuthenticationResponse;
+import com.unigrad.funiverseauthenservice.payload.response.LoginResponse;
+import com.unigrad.funiverseauthenservice.payload.response.TokenRefreshResponse;
+import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
 import com.unigrad.funiverseauthenservice.security.services.AuthenticationService;
-import com.unigrad.funiverseauthenservice.payload.request.RegisterRequest;
+import com.unigrad.funiverseauthenservice.security.services.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,20 +29,52 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
   private final AuthenticationService service;
+  private final AuthenticationManager authenticationManager;
+  private final RefreshTokenService refreshTokenService;
+  private final JwtService jwtService;
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        User userDetails = (User) authentication.getPrincipal();
+        String jwt = jwtService.generateToken(userDetails);
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
+
+        return ResponseEntity.ok(new LoginResponse(
+                jwt,
+                refreshToken.getToken(),
+                userDetails));
+    }
 
   @PostMapping("/register")
-  public ResponseEntity<AuthenticationResponse> register(
-      @RequestBody RegisterRequest request
-  ) {
+  public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
     return ResponseEntity.ok(service.register(request));
   }
-  @PostMapping("/authenticate")
-  public ResponseEntity<AuthenticationResponse> authenticate(
-      @RequestBody AuthenticationRequest request
-  ) {
-    return ResponseEntity.ok(service.authenticate(request));
+
+  @PostMapping("/refreshtoken")
+  public ResponseEntity<?> refreshtoken(@RequestBody TokenRefreshRequest request) {
+    String requestRefreshToken = request.getRefreshToken();
+    return refreshTokenService.findByToken(requestRefreshToken)
+            .map(refreshTokenService::verifyExpiration)
+            .map(RefreshToken::getUser)
+            .map(user -> {
+              String token = jwtService.generateToken(user);
+              return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+            })
+            .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                    "Refresh token is not in database!"));
   }
 
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logoutUser(@RequestBody LogOutRequest logOutRequest) {
+        refreshTokenService.deleteByAccount(logOutRequest.getAccountName());
+        return ResponseEntity.ok("Log out successful!");
+    }
 }

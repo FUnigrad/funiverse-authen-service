@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-//@Data
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +24,8 @@ public class User implements UserDetails {
   private String username;
   private String password;
   private String tenantId;
-
+  @Enumerated(EnumType.STRING)
+  private Role role;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

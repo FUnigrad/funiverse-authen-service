@@ -6,16 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
-  private String accessToken;
+public class LoginResponse {
+    private String accessToken;
 
-//  private final String type = "Bearer";
+//    private final String type = "Bearer";
 
-  private String refreshToken;
+    private String refreshToken;
 
-  private User user;
+    private User user;
 }

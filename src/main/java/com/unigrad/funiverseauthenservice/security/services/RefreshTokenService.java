@@ -25,6 +25,7 @@ public class RefreshTokenService {
     @Autowired
     private IRefreshTokenRepository refreshTokenRepository;
 
+
     public RefreshToken createRefreshToken(String accountName) {
         RefreshToken refreshToken = new RefreshToken();
 
@@ -33,5 +34,23 @@ public class RefreshTokenService {
         refreshToken.setToken(UUID.randomUUID().toString());
 
         return refreshTokenRepository.save(refreshToken);
+    }
+
+
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepository.findByToken(token);
+    }
+    public RefreshToken verifyExpiration(RefreshToken token) {
+        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+            refreshTokenRepository.delete(token);
+            throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new login request!");
+        }
+
+        return token;
+    }
+
+    @Transactional
+    public void deleteByAccount(String username) {
+        refreshTokenRepository.deleteRefreshTokensByUser_Username(username);
     }
 }
