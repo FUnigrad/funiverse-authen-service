@@ -1,6 +1,6 @@
 package com.unigrad.funiverseauthenservice.security.jwt;
 
-import com.unigrad.funiverseauthenservice.domain.User;
+import com.unigrad.funiverseauthenservice.security.services.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -34,14 +34,17 @@ public class JwtService {
     return claimsResolver.apply(claims);
   }
 
-  public String generateToken(User user) {
-    return generateToken(new HashMap<>(), user);
+  public String generateToken(UserDetailsImpl user) {
+    Map<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put("username", user.getUsername());
+    extraClaims.put("campusId", user.getCampusId());
+    extraClaims.put("role", user.getRole());
+    return generateToken(extraClaims, user);
   }
 
-  public String generateToken(
-      Map<String, Object> extraClaims,
-      UserDetails userDetails
-  ) {
+  public String generateToken(Map<String, Object> extraClaims,
+                              UserDetails userDetails)
+  {
     return Jwts
         .builder()
         .setClaims(extraClaims)

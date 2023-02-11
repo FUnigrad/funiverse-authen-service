@@ -1,5 +1,6 @@
 package com.unigrad.funiverseauthenservice.domain;
 
+import com.unigrad.funiverseauthenservice.security.services.UserDetailsImpl;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class RefreshToken {
 
     @OneToOne
     @JoinColumn
-    private User user;
+    private UserDetailsImpl user;
 
     private String token;
 

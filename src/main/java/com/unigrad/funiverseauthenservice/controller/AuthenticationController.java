@@ -3,6 +3,7 @@ package com.unigrad.funiverseauthenservice.controller;
 
 import com.unigrad.funiverseauthenservice.domain.RefreshToken;
 import com.unigrad.funiverseauthenservice.domain.User;
+import com.unigrad.funiverseauthenservice.security.services.UserDetailsImpl;
 import com.unigrad.funiverseauthenservice.exception.TokenRefreshException;
 import com.unigrad.funiverseauthenservice.payload.request.*;
 import com.unigrad.funiverseauthenservice.payload.response.AuthenticationResponse;
@@ -12,7 +13,6 @@ import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
 import com.unigrad.funiverseauthenservice.security.services.AuthenticationService;
 import com.unigrad.funiverseauthenservice.security.services.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,7 +41,7 @@ public class AuthenticationController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User userDetails = (User) authentication.getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String jwt = jwtService.generateToken(userDetails);
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
@@ -49,7 +49,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(new LoginResponse(
                 jwt,
                 refreshToken.getToken(),
-                userDetails));
+                new User(userDetails.getUsername(), userDetails.getCampusId(), userDetails.getRole())));
     }
 
   @PostMapping("/register")

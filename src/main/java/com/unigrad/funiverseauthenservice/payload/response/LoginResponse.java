@@ -1,6 +1,7 @@
 package com.unigrad.funiverseauthenservice.payload.response;
 
 import com.unigrad.funiverseauthenservice.domain.User;
+import com.unigrad.funiverseauthenservice.security.services.UserDetailsImpl;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
