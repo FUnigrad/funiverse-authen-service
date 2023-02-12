@@ -1,12 +1,15 @@
-package com.unigrad.funiverseauthenservice.domain;
+package com.unigrad.funiverseauthenservice.entity;
 
-import com.unigrad.funiverseauthenservice.security.services.UserDetailsImpl;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 
 import java.time.Instant;
 
@@ -23,7 +26,7 @@ public class RefreshToken {
 
     @OneToOne
     @JoinColumn
-    private UserDetailsImpl user;
+    private User user;
 
     private String token;
 

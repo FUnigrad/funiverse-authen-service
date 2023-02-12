@@ -1,10 +1,9 @@
 package com.unigrad.funiverseauthenservice.security.services;
 
-import com.unigrad.funiverseauthenservice.domain.RefreshToken;
+import com.unigrad.funiverseauthenservice.entity.RefreshToken;
 import com.unigrad.funiverseauthenservice.exception.TokenRefreshException;
 import com.unigrad.funiverseauthenservice.repository.IRefreshTokenRepository;
-import com.unigrad.funiverseauthenservice.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.unigrad.funiverseauthenservice.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,14 +18,17 @@ public class RefreshTokenService {
     @Value("${app.jwtRefreshExpirationMs}")
     private Long refreshTokenDuration;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final IUserRepository userRepository;
 
-    @Autowired
-    private IRefreshTokenRepository refreshTokenRepository;
+    private final IRefreshTokenRepository refreshTokenRepository;
 
+    public RefreshTokenService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository) {
+        this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     public RefreshToken createRefreshToken(String accountName) {
+
         RefreshToken refreshToken = new RefreshToken();
 
         refreshToken.setUser(userRepository.findByUsername(accountName).get());
@@ -38,9 +40,12 @@ public class RefreshTokenService {
 
 
     public Optional<RefreshToken> findByToken(String token) {
+
         return refreshTokenRepository.findByToken(token);
     }
+
     public RefreshToken verifyExpiration(RefreshToken token) {
+
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
             throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new login request!");
@@ -51,6 +56,7 @@ public class RefreshTokenService {
 
     @Transactional
     public void deleteByAccount(String username) {
+
         refreshTokenRepository.deleteRefreshTokensByUser_Username(username);
     }
 }
