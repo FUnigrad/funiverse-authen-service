@@ -26,7 +26,6 @@ jobs:
         run : |
           PATH=$(pwd)
           echo $PATH
-#         mv $PATH/target/*.jar $PATH/target/app.jar
           java -jar $PATH/target/*.jar
 
       - name: Build Success
