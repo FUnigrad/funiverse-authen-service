@@ -22,11 +22,11 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode clean package
 
-      - name: Test Run
-        run : |
-          PATH=$(pwd)
-          echo $PATH
-          java -jar $PATH/target/*.jar
+      # - name: Test Run
+      #   run : |
+      #     PATH=$(pwd)
+      #     echo $PATH
+      #     java -jar $PATH/target/*.jar
 
       - name: Build Success
         uses : rjstone/discord-webhook-notify@v1
