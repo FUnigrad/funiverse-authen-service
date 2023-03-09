@@ -3,6 +3,7 @@ name: Build and test on Pull request
 on: pull_request
 env:
   IMAGE_NAME: ${{vars.AUTHEN_SERVICE_REPO}}
+  APP_NAME: Authen Service
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -21,13 +22,6 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode clean package
 
-      # - name: Publish Test Results
-      #   uses: EnricoMi/publish-unit-test-result-action@v2
-      #   if: success()
-      #   with:
-      #     files: |
-      #       **/target/surefire-reports/**.xml
-    
       - name: Build Success
         uses : rjstone/discord-webhook-notify@v1
         if: success()
@@ -35,7 +29,7 @@ jobs:
           severity: info
           details: |
             - **Commit** : https://github.com/${{ github.repository }}/ commit/${{  github.event.pull_request.head.sha }}
-            Build Authen Service succeeded!
+            Build **${{env.APP_NAME}}** succeeded!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
       
       - name: Build Failed
@@ -45,6 +39,6 @@ jobs:
           severity: error
           details: |
             - **Commit** : https://github.com/${{ github.repository }}/commit/${{  github.event.pull_request.head.sha }}
-            Build Authen Service failed!
+            Build **${{env.APP_NAME}}** failed!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 

@@ -6,7 +6,7 @@ on:
 
 env:
   IMAGE_NAME: ${{vars.AUTHEN_SERVICE_REPO}}
-
+  APP_NAME: Authen Service
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
         with:
           severity: info
           details: |
-            Build Authen Service succeeded!
+            Build **${{env.APP_NAME}}** success!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
     
       - name: Build Fail
@@ -55,8 +55,9 @@ jobs:
         with:
           severity: error
           details: |
-            Build Authen Service failed!
+            Build **${{env.APP_NAME}}** failed!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+    
     outputs:
       version: ${{steps.build.outputs.digest}}
 
@@ -89,7 +90,7 @@ jobs:
         with:
           severity: error
           details: |
-            Deploy Failed!
+            Deploy **${{env.APP_NAME}}** Failed!
             Check log in github action
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
@@ -99,5 +100,5 @@ jobs:
         with:
           severity: info
           details: |
-            Deploy Success!
+            Deploy **${{env.APP_NAME}}** Success!
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
