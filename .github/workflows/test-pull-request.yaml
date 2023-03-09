@@ -22,6 +22,11 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode clean package
 
+      - name: Test Run
+        run : |
+          mv **/target/*.jar /app/app.jar
+          java -jar /app/app.jar
+
       - name: Build Success
         uses : rjstone/discord-webhook-notify@v1
         if: success()
