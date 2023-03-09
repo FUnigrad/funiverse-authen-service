@@ -24,8 +24,9 @@ jobs:
 
       - name: Test Run
         run : |
-          mv **/target/*.jar /app/app.jar
-          java -jar /app/app.jar
+          PATH=$(pwd) 
+          mv $PATH/target/*.jar $PATH/target/app.jar
+          java -jar $PATH/target/app.jar
 
       - name: Build Success
         uses : rjstone/discord-webhook-notify@v1
