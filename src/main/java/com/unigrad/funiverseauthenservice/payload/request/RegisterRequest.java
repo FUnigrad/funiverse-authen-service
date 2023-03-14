@@ -16,7 +16,7 @@ public class RegisterRequest {
 
     private String password;
 
-    private String campusId;
+    private String workspaceId;
 
     private Role role;
 }

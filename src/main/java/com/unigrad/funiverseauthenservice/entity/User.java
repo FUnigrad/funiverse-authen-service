@@ -1,11 +1,7 @@
 package com.unigrad.funiverseauthenservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,21 +24,24 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    private String username;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String personalMail;
+
+    private String eduMail;
 
     private String password;
 
-    private String campusId;
+    @ManyToOne
+    @JoinColumn
+    private Workspace workspace;
+
+    private boolean isActive;
 
     @JsonIgnore
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    public User(String username, String campusId, Role role) {
-        this.username = username;
-        this.campusId = campusId;
-        this.role = role;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -57,7 +56,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return eduMail;
     }
 
     @Override
@@ -81,7 +80,7 @@ public class User implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return true;
+        return isActive;
     }
 
 }

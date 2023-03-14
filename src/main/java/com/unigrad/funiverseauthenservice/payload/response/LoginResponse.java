@@ -1,6 +1,7 @@
 package com.unigrad.funiverseauthenservice.payload.response;
 
 import com.unigrad.funiverseauthenservice.entity.User;
+import com.unigrad.funiverseauthenservice.payload.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,5 @@ public class LoginResponse {
 
     private String refreshToken;
 
-    private User user;
+    private UserDTO user;
 }

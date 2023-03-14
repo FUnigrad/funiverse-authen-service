@@ -2,6 +2,7 @@ package com.unigrad.funiverseauthenservice.controller;
 
 
 import com.unigrad.funiverseauthenservice.entity.RefreshToken;
+import com.unigrad.funiverseauthenservice.payload.UserDTO;
 import com.unigrad.funiverseauthenservice.payload.request.LogOutRequest;
 import com.unigrad.funiverseauthenservice.payload.request.LoginRequest;
 import com.unigrad.funiverseauthenservice.payload.request.RegisterRequest;
@@ -55,13 +56,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(new LoginResponse(
                 jwt,
                 refreshToken.getToken(),
-                new User(userDetails.getUsername(), userDetails.getCampusId(), userDetails.getRole())));
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequest request) {
-
-        return ResponseEntity.ok(service.register(request));
+                new UserDTO(userDetails.getUsername(), userDetails.getWorkspace().getCode(), userDetails.getRole())));
     }
 
     @PostMapping("/refresh-token")
