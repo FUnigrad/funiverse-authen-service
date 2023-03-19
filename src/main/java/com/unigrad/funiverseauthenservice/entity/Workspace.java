@@ -6,11 +6,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.OneToOne;
+import lombok.*;
 
 import java.util.List;
 
@@ -19,6 +18,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Workspace {
 
     @Id
@@ -33,9 +33,9 @@ public class Workspace {
     @Column(unique = true, nullable = false)
     private String domain;
 
-    private boolean isActive;
+    private boolean isActive = true;
 
-    @OneToMany
+    @OneToMany(mappedBy = "workspace")
     @JsonIgnore
     private List<User> users;
 }

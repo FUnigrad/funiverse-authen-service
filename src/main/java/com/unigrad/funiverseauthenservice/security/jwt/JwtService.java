@@ -41,7 +41,9 @@ public class JwtService {
         Map<String, Object> extraClaims = new HashMap<>();
 
         extraClaims.put("username", user.getUsername());
-        extraClaims.put("workspaceId", user.getWorkspace().getId());
+        if (user.getWorkspace() != null) {
+            extraClaims.put("workspaceId", user.getWorkspace().getId());
+        }
         extraClaims.put("role", user.getRole());
 
         return "Bearer " + generateToken(extraClaims, user);

@@ -1,18 +1,19 @@
 package com.unigrad.funiverseauthenservice.payload;
 
-import com.unigrad.funiverseauthenservice.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-
-    private String eduMail;
-
-    private Role role;
+public class ErrorMessage {
+    private int statusCode;
+    private LocalDateTime timestamp;
+    private String message;
+    private String description;
 }

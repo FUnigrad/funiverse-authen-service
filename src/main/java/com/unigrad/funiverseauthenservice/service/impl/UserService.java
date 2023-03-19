@@ -18,6 +18,11 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public Optional<User> findByMail(String mail) {
+        return userRepository.findByEduMail(mail);
+    }
+
+    @Override
     public List<User> getAll() {
         return userRepository.findAll();
     }

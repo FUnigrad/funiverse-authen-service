@@ -1,4 +1,4 @@
-package com.unigrad.funiverseauthenservice.payload.request;
+package com.unigrad.funiverseauthenservice.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class UserDTO {
+    private Long id;
 
-    private String email;
+    private String personalMail;
+
+    private String eduMail;
+
     private String password;
 }
