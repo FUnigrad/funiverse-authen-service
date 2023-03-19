@@ -1,7 +1,8 @@
 package com.unigrad.funiverseauthenservice.security.services;
 
 import com.unigrad.funiverseauthenservice.entity.RefreshToken;
-import com.unigrad.funiverseauthenservice.exception.TokenRefreshException;
+import com.unigrad.funiverseauthenservice.exception.ExpiredTokenException;
+import com.unigrad.funiverseauthenservice.payload.TokenErrorMessage;
 import com.unigrad.funiverseauthenservice.repository.IRefreshTokenRepository;
 import com.unigrad.funiverseauthenservice.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,13 +28,16 @@ public class RefreshTokenService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public RefreshToken createRefreshToken(String accountName) {
+    public RefreshToken createRefreshToken(String eduMail) {
 
         RefreshToken refreshToken = new RefreshToken();
 
-        refreshToken.setUser(userRepository.findByEduMail(accountName).get());
+        //noinspection OptionalGetWithoutIsPresent
+        refreshToken.setUser(userRepository.findByEduMail(eduMail).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDuration));
         refreshToken.setToken(UUID.randomUUID().toString());
+
+        refreshTokenRepository.deleteRefreshTokensByUser_EduMail(eduMail);
 
         return refreshTokenRepository.save(refreshToken);
     }
@@ -44,11 +48,11 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
-    public RefreshToken verifyExpiration(RefreshToken token) {
+    public RefreshToken verifyExpiration(RefreshToken token) throws ExpiredTokenException {
 
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-            throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new login request!");
+            throw new ExpiredTokenException("Refresh token was expired. Please make a new login request!", TokenErrorMessage.TokenType.REFRESH_TOKEN);
         }
 
         return token;

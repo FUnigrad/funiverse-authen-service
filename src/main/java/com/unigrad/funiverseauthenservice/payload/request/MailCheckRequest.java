@@ -9,8 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class MailCheckRequest {
 
     private String email;
-    private String password;
+
+    private Long workspaceId;
 }
