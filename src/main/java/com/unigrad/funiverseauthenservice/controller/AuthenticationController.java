@@ -143,7 +143,7 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("check-mail")
+    @PostMapping("verify-mail")
     public ResponseEntity<Workspace> checkEmail(@RequestBody MailCheckRequest mailCheckRequest) {
         Optional<User> userOptional = userService.findByMail(mailCheckRequest.getEmail());
 
