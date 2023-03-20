@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserDTO {
 
-    private String eduMail;
+    private String personalMail;
 
     private Role role;
 }

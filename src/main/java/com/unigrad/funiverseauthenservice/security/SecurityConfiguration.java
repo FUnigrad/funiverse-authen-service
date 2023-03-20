@@ -63,7 +63,7 @@ public class SecurityConfiguration {
         ;
 
         http.authorizeHttpRequests()
-                .requestMatchers("/oauth/**").permitAll()
+                .requestMatchers("/api/oauth/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/workspace/**").hasAuthority(Role.SYSTEM_ADMIN.toString())
                 .requestMatchers("/api/user/**").hasAuthority(Role.WORKSPACE_ADMIN.toString())

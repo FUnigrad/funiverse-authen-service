@@ -64,8 +64,8 @@ public class WorkspaceController {
 
         User admin = User.builder()
                 .workspace(newWorkspace)
-                .personalMail(workspaceDTO.getPersonalMail())
                 .eduMail(workspaceDTO.getEduMail())
+                .personalMail(workspaceDTO.getPersonalMail())
                 .password(passwordEncoder.encode(workspaceDTO.getPassword()))
                 .role(Role.WORKSPACE_ADMIN)
                 .isActive(true)

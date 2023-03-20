@@ -35,9 +35,9 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String personalMail;
-
     private String eduMail;
+
+    private String personalMail;
 
     private String password;
 
@@ -64,7 +64,7 @@ public class User implements UserDetails {
     @Override
     @JsonIgnore
     public String getUsername() {
-        return eduMail;
+        return personalMail;
     }
 
     @Override
