@@ -21,6 +21,4 @@ public class WorkspaceCreateRequest {
     private String personalMail;
 
     private String eduMail;
-
-    private String password;
 }

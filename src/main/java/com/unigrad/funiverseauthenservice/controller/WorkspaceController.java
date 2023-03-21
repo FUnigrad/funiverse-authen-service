@@ -66,7 +66,7 @@ public class WorkspaceController {
                 .workspace(newWorkspace)
                 .eduMail(workspaceDTO.getEduMail())
                 .personalMail(workspaceDTO.getPersonalMail())
-                .password(passwordEncoder.encode(workspaceDTO.getPassword()))
+                .password(passwordEncoder.encode("123456"))
                 .role(Role.WORKSPACE_ADMIN)
                 .isActive(true)
                 .build();
