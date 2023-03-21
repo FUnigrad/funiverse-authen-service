@@ -128,7 +128,7 @@ public class AuthenticationController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String userMail = authentication.getName();
-        Optional<User> userOptional = userService.findByMail(userMail);
+        Optional<User> userOptional = userService.findByPersonalMail(userMail);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -145,7 +145,7 @@ public class AuthenticationController {
 
     @PostMapping("verify-mail")
     public ResponseEntity<Workspace> checkEmail(@RequestBody MailCheckRequest mailCheckRequest) {
-        Optional<User> userOptional = userService.findByMail(mailCheckRequest.getEmail());
+        Optional<User> userOptional = userService.findByPersonalMail(mailCheckRequest.getEmail());
 
         if (mailCheckRequest.getWorkspaceId() == null) {
             if (userOptional.isPresent()) {

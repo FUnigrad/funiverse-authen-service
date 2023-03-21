@@ -28,16 +28,16 @@ public class RefreshTokenService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public RefreshToken createRefreshToken(String eduMail) {
+    public RefreshToken createRefreshToken(String personalMail) {
 
         RefreshToken refreshToken = new RefreshToken();
 
         //noinspection OptionalGetWithoutIsPresent
-        refreshToken.setUser(userRepository.findByEduMail(eduMail).get());
+        refreshToken.setUser(userRepository.findByPersonalMail(personalMail).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDuration));
         refreshToken.setToken(UUID.randomUUID().toString());
 
-        refreshTokenRepository.deleteRefreshTokensByUser_EduMail(eduMail);
+        refreshTokenRepository.deleteRefreshTokensByUser_PersonalMail(personalMail);
 
         return refreshTokenRepository.save(refreshToken);
     }
@@ -61,6 +61,6 @@ public class RefreshTokenService {
     @Transactional
     public void deleteByAccount(String eduMail) {
 
-        refreshTokenRepository.deleteRefreshTokensByUser_EduMail(eduMail);
+        refreshTokenRepository.deleteRefreshTokensByUser_PersonalMail(eduMail);
     }
 }

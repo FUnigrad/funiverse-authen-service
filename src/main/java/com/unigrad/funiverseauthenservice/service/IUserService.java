@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface IUserService extends IBaseService<User, Long> {
 
-    Optional<User> findByMail(String mail);
+    Optional<User> findByPersonalMail(String mail);
 }

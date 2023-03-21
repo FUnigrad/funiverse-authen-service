@@ -17,7 +17,7 @@ public class InitialData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userService.findByMail("funigrad2023@gmail.com").isEmpty()) {
+        if (userService.findByPersonalMail("funigrad2023@gmail.com").isEmpty()) {
             User user = User.builder()
                     .eduMail("funigrad2023@gmail.com")
                     .personalMail("funigrad2023@gmail.com")

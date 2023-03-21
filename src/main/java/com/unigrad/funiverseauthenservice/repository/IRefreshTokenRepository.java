@@ -13,5 +13,5 @@ public interface IRefreshTokenRepository extends JpaRepository<RefreshToken, Lon
 
     @Modifying
     @Transactional
-    void deleteRefreshTokensByUser_EduMail(String username);
+    void deleteRefreshTokensByUser_PersonalMail(String username);
 }

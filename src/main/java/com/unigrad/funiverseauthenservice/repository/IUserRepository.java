@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface IUserRepository extends IBaseRepository<User, Long> {
 
-    @Query(value = "select u from User u where u.eduMail = :eduMail and u.isActive = true")
-    Optional<User> findByEduMail(String eduMail);
+    @Query(value = "select u from User u where u.personalMail = :personalMail and u.isActive = true")
+    Optional<User> findByPersonalMail(String personalMail);
 }

@@ -52,7 +52,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
         String email = oauthUser.getEmail();
 
-        Optional<User> userOptional = userService.findByMail(email);
+        Optional<User> userOptional = userService.findByPersonalMail(email);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
