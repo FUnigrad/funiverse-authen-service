@@ -81,6 +81,11 @@ public class WorkspaceService implements IWorkspaceService {
         return userDetails.getWorkspace().getDomain();
     }
 
+    @Override
+    public boolean isDomainExist(String domain) {
+        return workspaceRepository.isDomainExist(domain);
+    }
+
     private boolean isLandingHost(String host) {
         return host.split("\\.").length == 2;
     }

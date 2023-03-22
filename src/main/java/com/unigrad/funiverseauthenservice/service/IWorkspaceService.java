@@ -10,4 +10,6 @@ public interface IWorkspaceService extends IBaseService<Workspace, Long> {
     Optional<Workspace> findByDomain(String domain);
 
     String extractWorkspaceDomain(User userDetails, String host);
+
+    boolean isDomainExist(String domain);
 }

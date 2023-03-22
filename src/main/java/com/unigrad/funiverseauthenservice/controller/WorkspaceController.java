@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -98,5 +99,12 @@ public class WorkspaceController {
 
         workspaceService.inactivate(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/is-exist")
+    public ResponseEntity<Void> isDomainExist(@RequestParam("domain") String domain) {
+        return workspaceService.isDomainExist(domain)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }
