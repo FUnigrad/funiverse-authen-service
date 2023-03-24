@@ -3,11 +3,15 @@ package com.unigrad.funiverseauthenservice.controller;
 import com.unigrad.funiverseauthenservice.entity.Role;
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.entity.Workspace;
-import com.unigrad.funiverseauthenservice.payload.response.WorkspaceCreateResponse;
+import com.unigrad.funiverseauthenservice.exception.DomainExistException;
+import com.unigrad.funiverseauthenservice.exception.ServiceCommunicateException;
 import com.unigrad.funiverseauthenservice.payload.request.WorkspaceCreateRequest;
+import com.unigrad.funiverseauthenservice.payload.response.WorkspaceCreateResponse;
+import com.unigrad.funiverseauthenservice.service.IAppCommunicateService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
 import com.unigrad.funiverseauthenservice.util.DTOConverter;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +27,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/workspace")
@@ -37,11 +40,14 @@ public class WorkspaceController {
 
     private final PasswordEncoder passwordEncoder;
 
-    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService, DTOConverter dtoConverter, PasswordEncoder passwordEncoder) {
+    private final IAppCommunicateService appCommunicateService;
+
+    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService, DTOConverter dtoConverter, PasswordEncoder passwordEncoder, IAppCommunicateService appCommunicateService) {
         this.workspaceService = workspaceService;
         this.userService = userService;
         this.dtoConverter = dtoConverter;
         this.passwordEncoder = passwordEncoder;
+        this.appCommunicateService = appCommunicateService;
     }
 
     @GetMapping
@@ -52,7 +58,6 @@ public class WorkspaceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Workspace> getById(@PathVariable Long id) {
-        Optional<Workspace> workspaceOpt = workspaceService.get(id);
 
         return workspaceService.get(id)
                 .map(ResponseEntity::ok)
@@ -60,7 +65,12 @@ public class WorkspaceController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<WorkspaceCreateResponse> save(@RequestBody WorkspaceCreateRequest workspaceDTO) {
+        if (workspaceService.isDomainExist(workspaceDTO.getDomain())) {
+            throw new DomainExistException("%s is used".formatted(workspaceDTO.getDomain()));
+        }
+
         Workspace newWorkspace = workspaceService.save(dtoConverter.convert(workspaceDTO, Workspace.class));
 
         User admin = User.builder()
@@ -71,6 +81,11 @@ public class WorkspaceController {
                 .role(Role.WORKSPACE_ADMIN)
                 .isActive(true)
                 .build();
+
+        if (!(appCommunicateService.saveUser(admin, newWorkspace.getDomain())
+                && appCommunicateService.saveWorkspace(newWorkspace, newWorkspace.getDomain()))) {
+            throw new ServiceCommunicateException("An error occurs when call to %s".formatted(newWorkspace.getDomain()));
+        }
 
         WorkspaceCreateResponse result = dtoConverter.convert(newWorkspace, WorkspaceCreateResponse.class);
         result.setAdmin(dtoConverter.convert(userService.save(admin), WorkspaceCreateResponse.Admin.class));

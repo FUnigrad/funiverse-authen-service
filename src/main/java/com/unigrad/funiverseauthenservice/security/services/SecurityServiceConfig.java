@@ -1,7 +1,6 @@
 package com.unigrad.funiverseauthenservice.security.services;
 
-import com.unigrad.funiverseauthenservice.repository.IUserRepository;
-import org.modelmapper.ModelMapper;
+import com.unigrad.funiverseauthenservice.service.IUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,18 +13,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-public class ApplicationConfig {
+public class SecurityServiceConfig {
 
-    private final IUserRepository userRepository;
+    private final IUserService userService;
 
-    public ApplicationConfig(IUserRepository userRepository) {
-        this.userRepository = userRepository;
+    public SecurityServiceConfig(IUserService userService) {
+        this.userService = userService;
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
 
-        return username -> userRepository.findByPersonalMail(username)
+        return username -> userService.findByPersonalMail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
@@ -50,8 +49,4 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 }

@@ -1,7 +1,9 @@
 package com.unigrad.funiverseauthenservice.advice;
 
+import com.unigrad.funiverseauthenservice.exception.DomainExistException;
 import com.unigrad.funiverseauthenservice.exception.ExpiredTokenException;
 import com.unigrad.funiverseauthenservice.exception.InvalidRefreshTokenException;
+import com.unigrad.funiverseauthenservice.exception.ServiceCommunicateException;
 import com.unigrad.funiverseauthenservice.payload.ErrorMessage;
 import com.unigrad.funiverseauthenservice.payload.TokenErrorMessage;
 import org.springframework.http.HttpStatus;
@@ -40,9 +42,9 @@ public class ExceptionHandlerControllerAdvice {
         );
     }
 
-    @ExceptionHandler(value = UsernameNotFoundException.class)
+    @ExceptionHandler(value = {UsernameNotFoundException.class, DomainExistException.class, ServiceCommunicateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage handleUsernameNotFoundException(UsernameNotFoundException ex, WebRequest request) {
+    public ErrorMessage handleUsernameNotFoundException(RuntimeException ex, WebRequest request) {
 
         return new ErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
