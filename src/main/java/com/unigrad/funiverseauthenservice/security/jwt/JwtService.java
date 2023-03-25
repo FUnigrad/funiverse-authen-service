@@ -46,7 +46,7 @@ public class JwtService {
         }
         extraClaims.put("role", user.getRole());
 
-        return "Bearer " + generateToken(extraClaims, user);
+        return generateToken(extraClaims, user);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

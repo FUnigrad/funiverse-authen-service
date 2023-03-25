@@ -85,7 +85,8 @@ public class AuthenticationController {
 
             Cookie cookie = new Cookie("refresh-token", refreshToken.getToken());
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            cookie.setSecure(false);
+            cookie.setMaxAge(6000);
             response.addCookie(cookie);
 
             return ResponseEntity.ok(new LoginResponse(
