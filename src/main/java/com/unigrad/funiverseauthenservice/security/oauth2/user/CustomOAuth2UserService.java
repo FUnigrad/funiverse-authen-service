@@ -1,4 +1,4 @@
-package com.unigrad.funiverseauthenservice.security.services;
+package com.unigrad.funiverseauthenservice.security.oauth2.user;
 
 import com.unigrad.funiverseauthenservice.payload.CustomOAuth2User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

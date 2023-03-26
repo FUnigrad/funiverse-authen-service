@@ -53,4 +53,16 @@ public class ExceptionHandlerControllerAdvice {
                 request.getDescription(false)
         );
     }
+
+    @ExceptionHandler(value = RuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleRunTimeException(RuntimeException ex, WebRequest request) {
+
+        return new ErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now(),
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+    }
 }

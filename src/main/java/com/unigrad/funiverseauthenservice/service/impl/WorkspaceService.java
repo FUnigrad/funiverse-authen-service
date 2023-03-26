@@ -63,7 +63,7 @@ public class WorkspaceService implements IWorkspaceService {
     @Override
     public String extractWorkspaceDomain(User userDetails, String host) {
         if (userDetails.getRole().equals(Role.SYSTEM_ADMIN)) {
-            return "52.77.34.138:30002";
+            return "admin.funiverse.world";
         }
 
         if (host.equals("localhost") || isLandingHost(host)) {

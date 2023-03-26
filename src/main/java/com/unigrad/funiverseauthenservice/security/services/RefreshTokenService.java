@@ -4,7 +4,7 @@ import com.unigrad.funiverseauthenservice.entity.RefreshToken;
 import com.unigrad.funiverseauthenservice.exception.ExpiredTokenException;
 import com.unigrad.funiverseauthenservice.payload.TokenErrorMessage;
 import com.unigrad.funiverseauthenservice.repository.IRefreshTokenRepository;
-import com.unigrad.funiverseauthenservice.repository.IUserRepository;
+import com.unigrad.funiverseauthenservice.service.IUserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +19,12 @@ public class RefreshTokenService {
     @Value("${app.jwtRefreshExpirationMs}")
     private Long refreshTokenDuration;
 
-    private final IUserRepository userRepository;
+    private final IUserService userService;
 
     private final IRefreshTokenRepository refreshTokenRepository;
 
-    public RefreshTokenService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository) {
-        this.userRepository = userRepository;
+    public RefreshTokenService(IUserService userService, IRefreshTokenRepository refreshTokenRepository) {
+        this.userService = userService;
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
@@ -33,7 +33,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = new RefreshToken();
 
         //noinspection OptionalGetWithoutIsPresent
-        refreshToken.setUser(userRepository.findByPersonalMail(personalMail).get());
+        refreshToken.setUser(userService.findByPersonalMail(personalMail).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDuration));
         refreshToken.setToken(UUID.randomUUID().toString());
 

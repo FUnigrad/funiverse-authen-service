@@ -42,7 +42,7 @@ public class JwtService {
 
         extraClaims.put("username", user.getUsername());
         if (user.getWorkspace() != null) {
-            extraClaims.put("workspaceId", user.getWorkspace().getId());
+            extraClaims.put("domain", user.getWorkspace().getDomain());
         }
         extraClaims.put("role", user.getRole());
 

@@ -2,10 +2,10 @@ package com.unigrad.funiverseauthenservice.controller;
 
 
 import com.unigrad.funiverseauthenservice.entity.RefreshToken;
+import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.entity.Workspace;
 import com.unigrad.funiverseauthenservice.exception.InvalidRefreshTokenException;
 import com.unigrad.funiverseauthenservice.payload.UserDTO;
-import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.payload.request.ChangePasswordRequest;
 import com.unigrad.funiverseauthenservice.payload.request.LogOutRequest;
 import com.unigrad.funiverseauthenservice.payload.request.LoginRequest;
@@ -17,8 +17,8 @@ import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
 import com.unigrad.funiverseauthenservice.security.services.RefreshTokenService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
+import com.unigrad.funiverseauthenservice.util.CookieUtils;
 import com.unigrad.funiverseauthenservice.util.DTOConverter;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ import java.net.URL;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/oauth")
+@RequestMapping("auth")
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
@@ -73,8 +73,19 @@ public class AuthenticationController {
         );
 
         try {
-            String host = new URL(request.getRequestURL().toString()).getHost();
             User userDetails = (User) authentication.getPrincipal();
+
+            // there is two place that user can log in, from Landing Page or Workspace domain
+            // If Landing Page, user is identify
+            // If Workspace domain, check if user is belonged to current host
+            String host = new URL(request.getRequestURL().toString()).getHost();
+
+            // check if host is Landing page or Workspace host
+//            if (!host.equals("localhost") && host.split("\\.").length == 3
+//                    && !host.split("\\.")[0].equals("admin")
+//                    && !host.equals(userDetails.getWorkspace().getDomain()))
+//                throw new AuthenticationCredentialsNotFoundException("User is not belonged to this domain");
+
             String workspaceDomain = workspaceService.extractWorkspaceDomain(userDetails, host);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -83,15 +94,12 @@ public class AuthenticationController {
 
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-            Cookie cookie = new Cookie("refresh-token", refreshToken.getToken());
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
-            cookie.setMaxAge(6000);
-            response.addCookie(cookie);
+            CookieUtils.addCookie(response, "refresh-token", refreshToken.getToken(), 600000000);
 
             return ResponseEntity.ok(new LoginResponse(
                     jwt,
                     dtoConverter.convert(userDetails, UserDTO.class),
+                    refreshToken.getToken(),
                     workspaceDomain));
 
         } catch (MalformedURLException e) {
