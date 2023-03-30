@@ -11,7 +11,9 @@ import com.unigrad.funiverseauthenservice.service.IAppCommunicateService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
 import com.unigrad.funiverseauthenservice.util.DTOConverter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -75,7 +77,7 @@ public class WorkspaceController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<WorkspaceCreateResponse> save(@RequestBody WorkspaceCreateRequest workspaceDTO) {
+    public ResponseEntity<WorkspaceCreateResponse> save(@RequestBody WorkspaceCreateRequest workspaceDTO, HttpServletRequest request) {
         if (workspaceService.isDomainExist(workspaceDTO.getDomain())) {
             throw new DomainExistException("%s is used".formatted(workspaceDTO.getDomain()));
         }
@@ -91,8 +93,10 @@ public class WorkspaceController {
                 .isActive(true)
                 .build();
 
-        if (!(appCommunicateService.saveUser(admin, newWorkspace.getDomain())
-                && appCommunicateService.saveWorkspace(newWorkspace, newWorkspace.getDomain()))) {
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (!(appCommunicateService.saveUser(admin, newWorkspace.getDomain(), token)
+                && appCommunicateService.saveWorkspace(newWorkspace, newWorkspace.getDomain(), token))) {
             throw new ServiceCommunicateException("An error occurs when call to %s".formatted(newWorkspace.getDomain()));
         }
 

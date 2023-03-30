@@ -25,14 +25,16 @@ public class AppCommunicateService implements IAppCommunicateService {
 
     private final Logger LOG = LoggerFactory.getLogger(AppCommunicateService.class);
 
+    private final String AUTHEN_SERVICE_URL = "authen.system.funiverse.world";
+
     private WebClient webClient;
 
     @Override
-    public boolean saveUser(User user, String domain) {
-        setUrl(domain);
+    public boolean saveUser(User user, String domain, String token) {
+        setUrl(domain, token);
 
         Mono<Boolean> isSuccessful =  webClient.post()
-                .uri("/user")
+                .uri("/user/admin")
                 .bodyValue(user)
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().is2xxSuccessful()) {
@@ -52,8 +54,8 @@ public class AppCommunicateService implements IAppCommunicateService {
     }
 
     @Override
-    public boolean saveWorkspace(Workspace workspace, String domain) {
-        setUrl(domain);
+    public boolean saveWorkspace(Workspace workspace, String domain, String token) {
+        setUrl(domain, token);
 
         Mono<Boolean> isSuccessful =  webClient.post()
                 .uri("/workspace")
@@ -75,7 +77,7 @@ public class AppCommunicateService implements IAppCommunicateService {
         }
     }
 
-    private void setUrl(String url) {
+    private void setUrl(String url, String jwt) {
         try {
             SslContext sslContext = SslContextBuilder.forClient()
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
@@ -85,8 +87,9 @@ public class AppCommunicateService implements IAppCommunicateService {
 
             webClient = WebClient.builder()
                     .baseUrl("http://" + ("localhost:8080".equals(url) ? url : "api." + url))
-                    .defaultHeader("Origin", "3.1.47.236:30001")
+                    .defaultHeader("Origin", AUTHEN_SERVICE_URL)
                     .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .defaultHeader(HttpHeaders.AUTHORIZATION, jwt)
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
 

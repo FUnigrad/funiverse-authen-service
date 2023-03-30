@@ -76,8 +76,7 @@ public class SecurityConfiguration implements WebMvcConfigurer {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/workspace/**").hasAuthority(Role.SYSTEM_ADMIN.toString())
                 .requestMatchers("/user/**").hasAuthority(Role.WORKSPACE_ADMIN.toString())
-                .anyRequest()
-                .permitAll()
+                .anyRequest().authenticated()
         ;
 
         return http.build();

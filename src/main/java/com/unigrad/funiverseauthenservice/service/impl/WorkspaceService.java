@@ -5,6 +5,7 @@ import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.entity.Workspace;
 import com.unigrad.funiverseauthenservice.repository.IWorkspaceRepository;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,7 @@ public class WorkspaceService implements IWorkspaceService {
     }
 
     @Override
+    @Transactional
     public void inactivate(Long key) {
         workspaceRepository.updateIsActive(key, false);
     }

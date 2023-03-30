@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface IAppCommunicateService {
-    boolean saveUser(User user, String domain);
+    boolean saveUser(User user, String domain, String token);
 
-    boolean saveWorkspace(Workspace workspace, String domain);
+    boolean saveWorkspace(Workspace workspace, String domain, String token);
 }

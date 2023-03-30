@@ -2,6 +2,7 @@ package com.unigrad.funiverseauthenservice.controller;
 
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.service.IUserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,16 +17,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final IUserService userService;
 
     private final PasswordEncoder passwordEncoder;
 
-    public UserController(IUserService userService, PasswordEncoder passwordEncoder) {
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @GetMapping
     public ResponseEntity<List<User>> get() {
@@ -35,7 +33,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> save(@RequestBody User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        String DEFAULT_PASS = "user";
+
+        user.setPassword(passwordEncoder.encode(DEFAULT_PASS));
 
         return ResponseEntity.created(null).body(userService.save(user));
     }
