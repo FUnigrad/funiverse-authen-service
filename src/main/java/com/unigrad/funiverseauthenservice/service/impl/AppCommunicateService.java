@@ -32,7 +32,7 @@ public class AppCommunicateService implements IAppCommunicateService {
         setUrl(domain);
 
         Mono<Boolean> isSuccessful =  webClient.post()
-                .uri("/api/user")
+                .uri("/user")
                 .bodyValue(user)
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().is2xxSuccessful()) {
@@ -56,7 +56,7 @@ public class AppCommunicateService implements IAppCommunicateService {
         setUrl(domain);
 
         Mono<Boolean> isSuccessful =  webClient.post()
-                .uri("/api/workspace")
+                .uri("/workspace")
                 .bodyValue(workspace)
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().is2xxSuccessful()) {

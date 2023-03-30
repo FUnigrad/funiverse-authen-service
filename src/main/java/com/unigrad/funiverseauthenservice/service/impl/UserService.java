@@ -23,6 +23,11 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public Optional<User> findWorkspaceAdmin(Long workspaceId) {
+        return userRepository.findWorkspaceAdmin(workspaceId);
+    }
+
+    @Override
     public List<User> getAll() {
         return userRepository.findAll();
     }

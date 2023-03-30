@@ -16,7 +16,7 @@ public class CORSConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
-                .maxAge(1000000000);
+                .maxAge(3600);
     }
 
     @Bean

@@ -27,9 +27,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("api/workspace")
+@RequestMapping("workspace")
 public class WorkspaceController {
 
     private final IWorkspaceService workspaceService;
@@ -53,15 +54,23 @@ public class WorkspaceController {
     @GetMapping
     public ResponseEntity<List<Workspace>> getAll() {
 
-        return ResponseEntity.ok(workspaceService.getAllActive());
+        return ResponseEntity.ok(workspaceService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Workspace> getById(@PathVariable Long id) {
+    public ResponseEntity<WorkspaceCreateResponse> getById(@PathVariable Long id) {
+        Optional<Workspace> workspaceOptional = workspaceService.get(id);
 
-        return workspaceService.get(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        if (workspaceOptional.isPresent()) {
+            Optional<User> adminOptional = userService.findWorkspaceAdmin(workspaceOptional.get().getId());
+            WorkspaceCreateResponse workspaceCreateResponse = dtoConverter.convert(workspaceOptional.get(), WorkspaceCreateResponse.class);
+
+            adminOptional.ifPresent(user -> workspaceCreateResponse.setAdmin(dtoConverter.convert(user, WorkspaceCreateResponse.Admin.class)));
+            return ResponseEntity.ok(workspaceCreateResponse);
+
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
