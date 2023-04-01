@@ -4,8 +4,10 @@ import com.unigrad.funiverseauthenservice.entity.Role;
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.entity.Workspace;
 import com.unigrad.funiverseauthenservice.repository.IWorkspaceRepository;
+import com.unigrad.funiverseauthenservice.service.IUserService;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +15,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class WorkspaceService implements IWorkspaceService {
 
     private final IWorkspaceRepository workspaceRepository;
 
-    public WorkspaceService(IWorkspaceRepository workspaceRepository) {
-        this.workspaceRepository = workspaceRepository;
-    }
+    private final IUserService userService;
 
     @Override
     public List<Workspace> getAll() {
@@ -49,7 +50,10 @@ public class WorkspaceService implements IWorkspaceService {
     @Override
     @Transactional
     public void inactivate(Long key) {
-        workspaceRepository.updateIsActive(key, false);
+        List<User> users = userService.findAllByWorkspaceId(key);
+
+        users.forEach(user -> userService.delete(user.getId()));
+        workspaceRepository.deleteById(key);
     }
 
     @Override

@@ -28,6 +28,16 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public List<User> findAllByWorkspaceId(Long id) {
+        return userRepository.findAllByWorkspaceId(id);
+    }
+
+    @Override
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
     public List<User> getAll() {
         return userRepository.findAll();
     }
