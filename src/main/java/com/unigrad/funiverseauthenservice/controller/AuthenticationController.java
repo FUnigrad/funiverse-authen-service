@@ -1,6 +1,7 @@
 package com.unigrad.funiverseauthenservice.controller;
 
 
+import com.unigrad.funiverseauthenservice.entity.Role;
 import com.unigrad.funiverseauthenservice.entity.Token;
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.entity.Workspace;
@@ -76,6 +77,7 @@ public class AuthenticationController {
         );
 
         User userDetails = (User) authentication.getPrincipal();
+        String workspaceDomain = Role.SYSTEM_ADMIN.equals(userDetails.getRole()) ? "system.funiverse.com" : userDetails.getWorkspace().getDomain();
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -89,7 +91,7 @@ public class AuthenticationController {
                 jwt,
                 dtoConverter.convert(userDetails, UserDTO.class),
                 token.getToken(),
-                userDetails.getWorkspace().getDomain()));
+                workspaceDomain));
     }
 
     @PostMapping("/refresh-token")
