@@ -114,7 +114,7 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public ResponseEntity<String> logoutUser(@RequestBody LogOutRequest logOutRequest) {
 
-        refreshTokenService.deleteByAccount(logOutRequest.getAccountName());
+        refreshTokenService.deleteByAccount(logOutRequest.getEmail());
         SecurityContextHolder.getContext().setAuthentication(null);
         return ResponseEntity.ok("Log out successful!");
     }

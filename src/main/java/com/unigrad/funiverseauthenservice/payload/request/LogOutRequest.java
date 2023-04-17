@@ -11,5 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LogOutRequest {
 
-    private String accountName;
+    private String email;
 }
