@@ -22,5 +22,6 @@ public class TokenErrorMessage {
     public enum TokenType {
         ACCESS_TOKEN,
         REFRESH_TOKEN,
+        OTP
     }
 }

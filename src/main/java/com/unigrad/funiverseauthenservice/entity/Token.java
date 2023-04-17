@@ -7,6 +7,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,11 +19,12 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class RefreshToken {
+@Builder
+public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @OneToOne
     @JoinColumn
@@ -31,4 +33,11 @@ public class RefreshToken {
     private String token;
 
     private Instant expiryDate;
+
+    private Type type = Type.REFRESH_TOKEN;
+
+    public enum Type {
+        REFRESH_TOKEN,
+        OTP
+    }
 }

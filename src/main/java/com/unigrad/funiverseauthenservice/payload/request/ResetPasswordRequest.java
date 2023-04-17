@@ -1,4 +1,4 @@
-package com.unigrad.funiverseauthenservice.util;
+package com.unigrad.funiverseauthenservice.payload.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-    private Long id;
+public class ResetPasswordRequest {
 
-    private String eduMail;
-
-    private String personalMail;
+    private String email;
 
     private String password;
 }

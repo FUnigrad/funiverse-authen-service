@@ -1,6 +1,6 @@
 package com.unigrad.funiverseauthenservice.security.oauth2;
 
-import com.unigrad.funiverseauthenservice.entity.RefreshToken;
+import com.unigrad.funiverseauthenservice.entity.Token;
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.payload.CustomOAuth2User;
 import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
@@ -54,13 +54,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             String jwt = jwtService.generateToken(user);
 
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+            Token token = refreshTokenService.createRefreshToken(user.getUsername());
 
 //            CookieUtils.addCookie(response, "refreshToken", refreshToken.getToken(), 604800);
 //            CookieUtils.addCookie(response, "accessToken", jwt, 172800);
 
             String targetUrl = UriComponentsBuilder.fromUriString(LANDING_PAGE_URL)
-                    .queryParam("refreshToken", refreshToken.getToken())
+                    .queryParam("refreshToken", token.getToken())
                     .queryParam("accessToken", jwt)
                     .build().toUriString();
 

@@ -1,26 +1,34 @@
 package com.unigrad.funiverseauthenservice.controller;
 
 
-import com.unigrad.funiverseauthenservice.entity.RefreshToken;
+import com.unigrad.funiverseauthenservice.entity.Token;
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.entity.Workspace;
+import com.unigrad.funiverseauthenservice.exception.ExpiredTokenException;
 import com.unigrad.funiverseauthenservice.exception.InvalidRefreshTokenException;
+import com.unigrad.funiverseauthenservice.payload.TokenErrorMessage;
 import com.unigrad.funiverseauthenservice.payload.UserDTO;
 import com.unigrad.funiverseauthenservice.payload.request.ChangePasswordRequest;
 import com.unigrad.funiverseauthenservice.payload.request.LogOutRequest;
 import com.unigrad.funiverseauthenservice.payload.request.LoginRequest;
 import com.unigrad.funiverseauthenservice.payload.request.MailCheckRequest;
+import com.unigrad.funiverseauthenservice.payload.request.OTPVerifyRequest;
+import com.unigrad.funiverseauthenservice.payload.request.ResetPasswordRequest;
 import com.unigrad.funiverseauthenservice.payload.request.TokenRefreshRequest;
 import com.unigrad.funiverseauthenservice.payload.response.LoginResponse;
 import com.unigrad.funiverseauthenservice.payload.response.TokenRefreshResponse;
 import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
 import com.unigrad.funiverseauthenservice.security.services.RefreshTokenService;
+import com.unigrad.funiverseauthenservice.service.IEmailService;
+import com.unigrad.funiverseauthenservice.service.ITokenService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
 import com.unigrad.funiverseauthenservice.util.CookieUtils;
 import com.unigrad.funiverseauthenservice.util.DTOConverter;
-import jakarta.servlet.http.HttpServletRequest;
+import com.unigrad.funiverseauthenservice.util.OTPUtil;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,17 +36,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("auth")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
@@ -51,60 +60,36 @@ public class AuthenticationController {
 
     private final IWorkspaceService workspaceService;
 
+    private final IEmailService emailService;
+
+    private final ITokenService tokenService;
+
     private final PasswordEncoder passwordEncoder;
 
     private final DTOConverter dtoConverter;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, RefreshTokenService refreshTokenService, JwtService jwtService, IUserService userService, PasswordEncoder passwordEncoder, IWorkspaceService workspaceService, DTOConverter dtoConverter) {
-        this.authenticationManager = authenticationManager;
-        this.refreshTokenService = refreshTokenService;
-        this.jwtService = jwtService;
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.workspaceService = workspaceService;
-        this.dtoConverter = dtoConverter;
-    }
-
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
 
-        try {
-            User userDetails = (User) authentication.getPrincipal();
+        User userDetails = (User) authentication.getPrincipal();
 
-            // there is two place that user can log in, from Landing Page or Workspace domain
-            // If Landing Page, user is identify
-            // If Workspace domain, check if user is belonged to current host
-            String host = new URL(request.getRequestURL().toString()).getHost();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // check if host is Landing page or Workspace host
-//            if (!host.equals("localhost") && host.split("\\.").length == 3
-//                    && !host.split("\\.")[0].equals("admin")
-//                    && !host.equals(userDetails.getWorkspace().getDomain()))
-//                throw new AuthenticationCredentialsNotFoundException("User is not belonged to this domain");
+        String jwt = jwtService.generateToken(userDetails);
 
-            String workspaceDomain = workspaceService.extractWorkspaceDomain(userDetails, host);
+        Token token = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        CookieUtils.addCookie(response, "refresh-token", token.getToken(), 600000000);
 
-            String jwt = jwtService.generateToken(userDetails);
-
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
-
-            CookieUtils.addCookie(response, "refresh-token", refreshToken.getToken(), 600000000);
-
-            return ResponseEntity.ok(new LoginResponse(
-                    jwt,
-                    dtoConverter.convert(userDetails, UserDTO.class),
-                    refreshToken.getToken(),
-                    workspaceDomain));
-
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        return ResponseEntity.ok(new LoginResponse(
+                jwt,
+                dtoConverter.convert(userDetails, UserDTO.class),
+                token.getToken(),
+                userDetails.getWorkspace().getDomain()));
     }
 
     @PostMapping("/refresh-token")
@@ -112,9 +97,9 @@ public class AuthenticationController {
 
         String requestRefreshToken = request.getRefreshToken();
 
-        return refreshTokenService.findByToken(requestRefreshToken)
+        return refreshTokenService.findByTokenAndType(requestRefreshToken, Token.Type.REFRESH_TOKEN)
                 .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
+                .map(Token::getUser)
                 .map(user -> {
                     String token = jwtService.generateToken(user);
                     return ResponseEntity.ok(new TokenRefreshResponse(token));
@@ -176,4 +161,60 @@ public class AuthenticationController {
         }
         throw new UsernameNotFoundException("Email %s not exist".formatted(mailCheckRequest.getEmail()));
     }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<String> sendMailResetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        Optional<User> userOptional = userService.findByPersonalMail(resetPasswordRequest.getEmail());
+
+        if (userOptional.isEmpty()) {
+            throw new UsernameNotFoundException("User with email %s is not exist".formatted(resetPasswordRequest.getEmail()));
+        }
+
+        Token token = OTPUtil.generate(userOptional.get());
+
+        try {
+            tokenService.deleteTokensByUser_PersonalMailAndType(userOptional.get().getPersonalMail(), Token.Type.OTP);
+            tokenService.save(token);
+            emailService.sendEmailResetPassword(token);
+        } catch (MessagingException | UnsupportedEncodingException e2) {
+            e2.printStackTrace();
+        }
+        return ResponseEntity.ok(token.getToken());
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<LoginResponse> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, HttpServletResponse response) {
+        Optional<User> userOptional = userService.findByPersonalMail(resetPasswordRequest.getEmail());
+
+        if (userOptional.isEmpty()) {
+            throw new UsernameNotFoundException("User with email %s is not exist".formatted(resetPasswordRequest.getEmail()));
+        }
+
+        userOptional.get().setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
+        userService.save(userOptional.get());
+        tokenService.deleteTokensByUser_PersonalMailAndType(userOptional.get().getPersonalMail(), Token.Type.OTP);
+
+        return login(new LoginRequest(resetPasswordRequest.getEmail(), resetPasswordRequest.getPassword()), response);
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<Void> verifyOTP(@RequestBody OTPVerifyRequest otpVerifyRequest) {
+        Optional<Token> tokenOptional = tokenService.findByTokenAndType(otpVerifyRequest.getToken(), Token.Type.OTP);
+
+        if (tokenOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (tokenOptional.get().getUser().getPersonalMail().equals(otpVerifyRequest.getEmail())) {
+            if (OTPUtil.isExpired(tokenOptional.get())) {
+                throw new ExpiredTokenException("Token is expired", TokenErrorMessage.TokenType.OTP);
+            }
+
+            tokenService.delete(tokenOptional.get().getId());
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
 }

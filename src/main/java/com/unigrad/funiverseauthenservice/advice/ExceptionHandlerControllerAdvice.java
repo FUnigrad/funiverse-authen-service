@@ -42,19 +42,19 @@ public class ExceptionHandlerControllerAdvice {
         );
     }
 
-    @ExceptionHandler(value = {UsernameNotFoundException.class, DomainExistException.class, ServiceCommunicateException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = {UsernameNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage handleUsernameNotFoundException(RuntimeException ex, WebRequest request) {
 
         return new ErrorMessage(
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.NOT_FOUND.value(),
                 LocalDateTime.now(),
                 ex.getMessage(),
                 request.getDescription(false)
         );
     }
 
-    @ExceptionHandler(value = RuntimeException.class)
+    @ExceptionHandler(value = {RuntimeException.class, DomainExistException.class, ServiceCommunicateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleRunTimeException(RuntimeException ex, WebRequest request) {
 

@@ -1,10 +1,11 @@
 package com.unigrad.funiverseauthenservice.security.services;
 
-import com.unigrad.funiverseauthenservice.entity.RefreshToken;
+import com.unigrad.funiverseauthenservice.entity.Token;
 import com.unigrad.funiverseauthenservice.exception.ExpiredTokenException;
 import com.unigrad.funiverseauthenservice.payload.TokenErrorMessage;
-import com.unigrad.funiverseauthenservice.repository.IRefreshTokenRepository;
+import com.unigrad.funiverseauthenservice.service.ITokenService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class RefreshTokenService {
 
     @Value("${app.jwtRefreshExpirationMs}")
@@ -21,37 +23,32 @@ public class RefreshTokenService {
 
     private final IUserService userService;
 
-    private final IRefreshTokenRepository refreshTokenRepository;
+    private final ITokenService tokenService;
 
-    public RefreshTokenService(IUserService userService, IRefreshTokenRepository refreshTokenRepository) {
-        this.userService = userService;
-        this.refreshTokenRepository = refreshTokenRepository;
-    }
+    public Token createRefreshToken(String personalMail) {
 
-    public RefreshToken createRefreshToken(String personalMail) {
-
-        RefreshToken refreshToken = new RefreshToken();
+        Token token = new Token();
 
         //noinspection OptionalGetWithoutIsPresent
-        refreshToken.setUser(userService.findByPersonalMail(personalMail).get());
-        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDuration));
-        refreshToken.setToken(UUID.randomUUID().toString());
+        token.setUser(userService.findByPersonalMail(personalMail).get());
+        token.setExpiryDate(Instant.now().plusMillis(refreshTokenDuration));
+        token.setToken(UUID.randomUUID().toString());
 
-        refreshTokenRepository.deleteRefreshTokensByUser_PersonalMail(personalMail);
+        tokenService.deleteTokensByUser_PersonalMailAndType(personalMail, Token.Type.REFRESH_TOKEN);
 
-        return refreshTokenRepository.save(refreshToken);
+        return tokenService.save(token);
     }
 
 
-    public Optional<RefreshToken> findByToken(String token) {
+    public Optional<Token> findByTokenAndType(String token, Token.Type type) {
 
-        return refreshTokenRepository.findByToken(token);
+        return tokenService.findByTokenAndType(token, type);
     }
 
-    public RefreshToken verifyExpiration(RefreshToken token) throws ExpiredTokenException {
+    public Token verifyExpiration(Token token) throws ExpiredTokenException {
 
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenRepository.delete(token);
+            tokenService.delete(token.getId());
             throw new ExpiredTokenException("Refresh token was expired. Please make a new login request!", TokenErrorMessage.TokenType.REFRESH_TOKEN);
         }
 
@@ -61,6 +58,6 @@ public class RefreshTokenService {
     @Transactional
     public void deleteByAccount(String eduMail) {
 
-        refreshTokenRepository.deleteRefreshTokensByUser_PersonalMail(eduMail);
+        tokenService.deleteTokensByUser_PersonalMailAndType(eduMail, Token.Type.REFRESH_TOKEN);
     }
 }
