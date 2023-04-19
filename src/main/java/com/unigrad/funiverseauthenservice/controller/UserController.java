@@ -1,7 +1,9 @@
 package com.unigrad.funiverseauthenservice.controller;
 
 import com.unigrad.funiverseauthenservice.entity.User;
+import com.unigrad.funiverseauthenservice.service.IEmailService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -24,6 +27,7 @@ public class UserController {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final IEmailService emailService;
 
     @GetMapping
     public ResponseEntity<List<User>> get() {
@@ -32,12 +36,15 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> save(@RequestBody User user) {
+    public ResponseEntity<User> save(@RequestBody User user) throws MessagingException, IOException {
         String DEFAULT_PASS = "user";
 
         user.setPassword(passwordEncoder.encode(DEFAULT_PASS));
 
-        return ResponseEntity.created(null).body(userService.save(user));
+        User newUser = userService.save(user);
+        emailService.sendWelcomeEmail(newUser.getWorkspace(), newUser, "user");
+
+        return ResponseEntity.created(null).body(newUser);
     }
 
     @DeleteMapping("{id}")

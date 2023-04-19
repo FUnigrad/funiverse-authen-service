@@ -1,17 +1,22 @@
 package com.unigrad.funiverseauthenservice.service.impl;
 
+import com.unigrad.funiverseauthenservice.entity.Role;
 import com.unigrad.funiverseauthenservice.entity.Token;
 import com.unigrad.funiverseauthenservice.entity.User;
+import com.unigrad.funiverseauthenservice.entity.Workspace;
 import com.unigrad.funiverseauthenservice.service.IEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 
 @Service
 @RequiredArgsConstructor
@@ -21,14 +26,18 @@ public class EmailService implements IEmailService {
 
     private final JavaMailSender servicesSender;
 
-    @Override
-    public void send(EmailServer server, String from, String to, String subject, String text) {
+    private final ResourceLoader resourceLoader;
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("noreply.funiverse@gmail.com");
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
+    @Override
+    public void send(EmailServer server, String from, String to, String subject, String content) throws MessagingException, UnsupportedEncodingException {
+
+        MimeMessage message = EmailServer.NOTIFICATION.equals(server) ? notificationSender.createMimeMessage() : servicesSender.createMimeMessage();
+
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom("noreply.funiverse@gmail.com", "%s via Funiverse".formatted(from));
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(content, true);
 
         if (EmailServer.NOTIFICATION.equals(server)) {
             notificationSender.send(message);
@@ -37,14 +46,11 @@ public class EmailService implements IEmailService {
         }
     }
 
-    public void sendEmailResetPassword(Token token) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage message = servicesSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-
+    public void sendResetPasswordEmail(Token token) throws MessagingException, UnsupportedEncodingException {
         User user = token.getUser();
-        helper.setFrom("noreply.funiverse@gmail.com", "%s via FUniverse".formatted(user.getWorkspace().getName()));
-        helper.setTo(user.getPersonalMail());
+
         String subject = "%s is your Workspace account recovery code".formatted(token.getToken());
+
         String otp = """
                 <td style="display:inline-block;margin-left:4px;margin-right:4px;text-align:center">
                     <span style="font-family:SF Pro Text,-apple-system,BlincMacSystemFont,Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;
@@ -75,6 +81,7 @@ public class EmailService implements IEmailService {
                         </tr>
                 </table>
                 """;
+
         String content = """
                 <div>
                   <p>
@@ -98,14 +105,41 @@ public class EmailService implements IEmailService {
                   %s
                 </div>
                 """.formatted(user.getEduMail(), otpHtml.toString(), buttonChangePasswordHtml);
-        helper.setSubject(subject);
-        helper.setText(content, true);
 
-        servicesSender.send(message);
+        send(EmailServer.SERVICES, user.getWorkspace().getName(), user.getPassword(), subject, content);
+    }
+
+    @Override
+    public void sendWelcomeEmail(Workspace workspace, User user, String password) throws IOException, MessagingException {
+        String path = Role.WORKSPACE_ADMIN.equals(user.getRole()) ? "classpath:email-content/welcome-admin.txt" : "classpath:email-content/welcome.txt";
+        Resource resource = resourceLoader.getResource(path);
+        String text = new String(Files.readAllBytes(resource.getFile().toPath()));
+        String content;
+        if (Role.WORKSPACE_ADMIN.equals(user.getRole())) {
+            content = String.format(text,
+                    user.getPersonalMail(),
+                    user.getPersonalMail(),
+                    password,
+                    user.getPersonalMail(),
+                    user.getPersonalMail(),
+                    user.getPersonalMail(),
+                    user.getPersonalMail());
+        } else {
+            content = String.format(text,
+                    user.getPersonalMail(),
+                    user.getPersonalMail(),
+                    workspace.getName(),
+                    password,
+                    user.getPersonalMail(),
+                    user.getPersonalMail(),
+                    user.getPersonalMail(),
+                    user.getPersonalMail());
+        }
+
+        send(EmailServer.NOTIFICATION, workspace.getName(), user.getPersonalMail(), "Log into Workspace to connect to your University", content);
     }
 
     public enum EmailServer {
-        NOTIFICATION,
-        SERVICES
+        NOTIFICATION, SERVICES
     }
 }

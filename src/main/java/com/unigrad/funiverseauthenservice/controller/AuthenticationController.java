@@ -189,7 +189,7 @@ public class AuthenticationController {
         return login(new LoginRequest(resetPasswordRequest.getEmail(), resetPasswordRequest.getPassword()), response);
     }
 
-    @GetMapping("/verify")
+    @PutMapping("/verify")
     public ResponseEntity<Void> verifyOTP(@RequestBody OTPVerifyRequest otpVerifyRequest) {
         Optional<Token> tokenOptional = tokenService.findByTokenAndType(otpVerifyRequest.getToken(), Token.Type.OTP);
 
@@ -208,5 +208,4 @@ public class AuthenticationController {
 
         return ResponseEntity.badRequest().build();
     }
-
 }

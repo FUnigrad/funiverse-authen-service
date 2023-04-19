@@ -54,7 +54,7 @@ public class ExceptionHandlerControllerAdvice {
         );
     }
 
-    @ExceptionHandler(value = {RuntimeException.class, DomainExistException.class, ServiceCommunicateException.class})
+    @ExceptionHandler(value = {DomainExistException.class, ServiceCommunicateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleRunTimeException(RuntimeException ex, WebRequest request) {
 

@@ -8,11 +8,14 @@ import com.unigrad.funiverseauthenservice.exception.ServiceCommunicateException;
 import com.unigrad.funiverseauthenservice.payload.request.WorkspaceCreateRequest;
 import com.unigrad.funiverseauthenservice.payload.response.WorkspaceCreateResponse;
 import com.unigrad.funiverseauthenservice.service.IAppCommunicateService;
+import com.unigrad.funiverseauthenservice.service.IEmailService;
 import com.unigrad.funiverseauthenservice.service.IUserService;
 import com.unigrad.funiverseauthenservice.service.IWorkspaceService;
 import com.unigrad.funiverseauthenservice.util.DTOConverter;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,12 +30,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("workspace")
+@RequiredArgsConstructor
 public class WorkspaceController {
 
     private final IWorkspaceService workspaceService;
@@ -45,13 +50,7 @@ public class WorkspaceController {
 
     private final IAppCommunicateService appCommunicateService;
 
-    public WorkspaceController(IWorkspaceService workspaceService, IUserService userService, DTOConverter dtoConverter, PasswordEncoder passwordEncoder, IAppCommunicateService appCommunicateService) {
-        this.workspaceService = workspaceService;
-        this.userService = userService;
-        this.dtoConverter = dtoConverter;
-        this.passwordEncoder = passwordEncoder;
-        this.appCommunicateService = appCommunicateService;
-    }
+    private final IEmailService emailService;
 
     @GetMapping
     public ResponseEntity<List<Workspace>> getAll() {
@@ -76,8 +75,8 @@ public class WorkspaceController {
     }
 
     @PostMapping
-    @Transactional
-    public ResponseEntity<WorkspaceCreateResponse> save(@RequestBody WorkspaceCreateRequest workspaceDTO, HttpServletRequest request) {
+    @Transactional(rollbackOn = ServiceCommunicateException.class)
+    public ResponseEntity<WorkspaceCreateResponse> save(@RequestBody WorkspaceCreateRequest workspaceDTO, HttpServletRequest request) throws MessagingException, IOException {
         if (workspaceService.isDomainExist(workspaceDTO.getDomain())) {
             throw new DomainExistException("%s is used".formatted(workspaceDTO.getDomain()));
         }
@@ -102,6 +101,7 @@ public class WorkspaceController {
 
         WorkspaceCreateResponse result = dtoConverter.convert(newWorkspace, WorkspaceCreateResponse.class);
         result.setAdmin(dtoConverter.convert(userService.save(admin), WorkspaceCreateResponse.Admin.class));
+        emailService.sendWelcomeEmail(newWorkspace, admin, "123456");
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
