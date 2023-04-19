@@ -42,7 +42,7 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(DEFAULT_PASS));
 
         User newUser = userService.save(user);
-        emailService.sendWelcomeEmail(newUser.getWorkspace(), newUser, "user");
+//        emailService.sendWelcomeEmail(newUser.getWorkspace(), newUser, "user");
 
         return ResponseEntity.created(null).body(newUser);
     }
