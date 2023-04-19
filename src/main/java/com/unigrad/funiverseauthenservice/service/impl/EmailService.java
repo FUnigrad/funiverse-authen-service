@@ -106,7 +106,7 @@ public class EmailService implements IEmailService {
                 </div>
                 """.formatted(user.getEduMail(), otpHtml.toString(), buttonChangePasswordHtml);
 
-        send(EmailServer.SERVICES, user.getWorkspace().getName(), user.getPassword(), subject, content);
+        send(EmailServer.SERVICES, user.getWorkspace().getName(), user.getPersonalMail(), subject, content);
     }
 
     @Override
