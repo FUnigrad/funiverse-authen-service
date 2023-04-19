@@ -9,13 +9,7 @@ import com.unigrad.funiverseauthenservice.exception.ExpiredTokenException;
 import com.unigrad.funiverseauthenservice.exception.InvalidRefreshTokenException;
 import com.unigrad.funiverseauthenservice.payload.TokenErrorMessage;
 import com.unigrad.funiverseauthenservice.payload.UserDTO;
-import com.unigrad.funiverseauthenservice.payload.request.ChangePasswordRequest;
-import com.unigrad.funiverseauthenservice.payload.request.LogOutRequest;
-import com.unigrad.funiverseauthenservice.payload.request.LoginRequest;
-import com.unigrad.funiverseauthenservice.payload.request.MailCheckRequest;
-import com.unigrad.funiverseauthenservice.payload.request.OTPVerifyRequest;
-import com.unigrad.funiverseauthenservice.payload.request.ResetPasswordRequest;
-import com.unigrad.funiverseauthenservice.payload.request.TokenRefreshRequest;
+import com.unigrad.funiverseauthenservice.payload.request.*;
 import com.unigrad.funiverseauthenservice.payload.response.LoginResponse;
 import com.unigrad.funiverseauthenservice.payload.response.TokenRefreshResponse;
 import com.unigrad.funiverseauthenservice.security.jwt.JwtService;
@@ -37,11 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Optional;
@@ -165,11 +155,11 @@ public class AuthenticationController {
     }
 
     @GetMapping("/reset-password")
-    public ResponseEntity<String> sendMailResetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
-        Optional<User> userOptional = userService.findByPersonalMail(resetPasswordRequest.getEmail());
+    public ResponseEntity<String> sendMailResetPassword(@RequestParam String email) {
+        Optional<User> userOptional = userService.findByPersonalMail(email);
 
         if (userOptional.isEmpty()) {
-            throw new UsernameNotFoundException("User with email %s is not exist".formatted(resetPasswordRequest.getEmail()));
+            throw new UsernameNotFoundException("User with email %s is not exist".formatted(email));
         }
 
         Token token = OTPUtil.generate(userOptional.get());
@@ -177,7 +167,7 @@ public class AuthenticationController {
         try {
             tokenService.deleteTokensByUser_PersonalMailAndType(userOptional.get().getPersonalMail(), Token.Type.OTP);
             tokenService.save(token);
-            emailService.sendEmailResetPassword(token);
+            emailService.sendResetPasswordEmail(token);
         } catch (MessagingException | UnsupportedEncodingException e2) {
             e2.printStackTrace();
         }
