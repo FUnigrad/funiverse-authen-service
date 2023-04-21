@@ -32,6 +32,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,9 +54,16 @@ public class WorkspaceController {
     private final IEmailService emailService;
 
     @GetMapping
-    public ResponseEntity<List<Workspace>> getAll() {
+    public ResponseEntity<List<WorkspaceCreateResponse>> getAll() {
+        List<Workspace> workspaceList = workspaceService.getAll();
+        List<WorkspaceCreateResponse> workspaceCreateResponses = Arrays
+                .stream(dtoConverter.convert(workspaceList, WorkspaceCreateResponse[].class)).toList();
 
-        return ResponseEntity.ok(workspaceService.getAll());
+        for (WorkspaceCreateResponse workspace : workspaceCreateResponses) {
+            workspace.setAdmin(dtoConverter.convert(userService.findWorkspaceAdmin(workspace.getId()), WorkspaceCreateResponse.Admin.class));
+        }
+
+        return ResponseEntity.ok(workspaceCreateResponses);
     }
 
     @GetMapping("/{id}")
