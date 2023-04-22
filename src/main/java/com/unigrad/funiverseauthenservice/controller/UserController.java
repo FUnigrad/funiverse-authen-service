@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("user")
@@ -47,10 +48,11 @@ public class UserController {
         return ResponseEntity.created(null).body(newUser);
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> inactivate(@PathVariable Long id) {
-        if (userService.isExist(id)) {
-            userService.inactivate(id);
+    @DeleteMapping("{email}")
+    public ResponseEntity<Void> inactivate(@PathVariable String email) {
+        Optional<User> userOptional = userService.findByPersonalMail(email);
+        if (userOptional.isPresent()) {
+            userService.inactivate(userOptional.get().getId());
 
             return ResponseEntity.ok().build();
         }
