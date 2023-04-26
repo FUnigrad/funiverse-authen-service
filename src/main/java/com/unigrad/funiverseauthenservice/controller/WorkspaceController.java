@@ -143,4 +143,19 @@ public class WorkspaceController {
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
     }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Void> activeWorkspace(@PathVariable Long id) {
+        Optional<Workspace> workspaceOptional = workspaceService.get(id);
+
+        if (workspaceOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        workspaceOptional.get().setActive(true);
+
+        workspaceService.save(workspaceOptional.get());
+
+        return ResponseEntity.ok().build();
+    }
 }
