@@ -43,8 +43,9 @@ public class WorkspaceService implements IWorkspaceService {
     }
 
     @Override
+    @Transactional
     public void activate(Long key) {
-
+        workspaceRepository.updateIsActive(key, true);
     }
 
     @Override

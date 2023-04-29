@@ -54,12 +54,14 @@ public class SecurityConfiguration implements WebMvcConfigurer {
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .oauth2Login()
                 .authorizationEndpoint()
                 .baseUri("/oauth2/authorize")
                 .and()
                 .redirectionEndpoint()
                 .baseUri("/oauth2/callback/*")
+
                 .and()
                 .userInfoEndpoint()
                 .userService(customOAuth2UserService)
@@ -74,7 +76,7 @@ public class SecurityConfiguration implements WebMvcConfigurer {
         http.authorizeHttpRequests()
                 .requestMatchers("/auth/**", "/oauth2/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/workspace/**").hasAuthority(Role.SYSTEM_ADMIN.toString())
+                .requestMatchers("/workspace/**").hasAnyAuthority(Role.SYSTEM_ADMIN.toString(), Role.WORKSPACE_ADMIN.toString())
                 .requestMatchers("/user/**").hasAuthority(Role.WORKSPACE_ADMIN.toString())
                 .anyRequest().authenticated()
         ;

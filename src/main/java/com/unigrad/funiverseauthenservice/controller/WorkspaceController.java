@@ -152,9 +152,7 @@ public class WorkspaceController {
             return ResponseEntity.notFound().build();
         }
 
-        workspaceOptional.get().setActive(true);
-
-        workspaceService.save(workspaceOptional.get());
+        workspaceService.activate(id);
 
         return ResponseEntity.ok().build();
     }
