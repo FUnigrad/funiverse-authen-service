@@ -86,7 +86,7 @@ public class AppCommunicateService implements IAppCommunicateService {
             HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
 
             webClient = WebClient.builder()
-                    .baseUrl("http://" + ("localhost:8080".equals(url) ? url : "api." + url))
+                    .baseUrl("https://" + ("localhost:8080".equals(url) ? url : "api." + url))
                     .defaultHeader("Origin", AUTHEN_SERVICE_URL)
                     .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .defaultHeader(HttpHeaders.AUTHORIZATION, jwt)
