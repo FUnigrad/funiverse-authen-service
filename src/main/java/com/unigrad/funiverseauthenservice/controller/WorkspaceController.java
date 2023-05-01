@@ -89,6 +89,12 @@ public class WorkspaceController {
             throw new DomainExistException("%s is used".formatted(workspaceDTO.getDomain()));
         }
 
+        Optional<Workspace> workspaceOptional = workspaceService.findByDomain(workspaceDTO.getDomain());
+
+        if (workspaceOptional.isPresent()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Workspace newWorkspace = workspaceService.save(dtoConverter.convert(workspaceDTO, Workspace.class));
 
         User admin = User.builder()
