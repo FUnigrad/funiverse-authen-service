@@ -96,9 +96,12 @@ public class WorkspaceController {
 
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (!(appCommunicateService.saveUser(admin, newWorkspace.getDomain(), token)
-                && appCommunicateService.saveWorkspace(newWorkspace, newWorkspace.getDomain(), token))) {
-            throw new ServiceCommunicateException("An error occurs when call to %s".formatted(newWorkspace.getDomain()));
+        if (!(appCommunicateService.saveWorkspace(newWorkspace, newWorkspace.getDomain(), token))) {
+            throw new ServiceCommunicateException("An error occurs when call to %s to save Workspace information".formatted(newWorkspace.getDomain()));
+        }
+
+        if (!(appCommunicateService.saveUser(admin, newWorkspace.getDomain(), token))) {
+            throw new ServiceCommunicateException("An error occurs when call to %s to save Workspace Admin".formatted(newWorkspace.getDomain()));
         }
 
         WorkspaceCreateResponse result = dtoConverter.convert(newWorkspace, WorkspaceCreateResponse.class);

@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.SSLException;
+import java.time.Duration;
 
 @Service
 public class AppCommunicateService implements IAppCommunicateService {
@@ -83,7 +84,9 @@ public class AppCommunicateService implements IAppCommunicateService {
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
                     .build();
 
-            HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
+            HttpClient httpClient = HttpClient.create()
+                    .secure(t -> t.sslContext(sslContext))
+                    .responseTimeout(Duration.ofSeconds(3600));
 
             webClient = WebClient.builder()
                     .baseUrl("https://" + ("localhost:8080".equals(url) ? url : "api." + url))
