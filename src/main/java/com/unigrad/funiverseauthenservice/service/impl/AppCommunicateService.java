@@ -89,7 +89,7 @@ public class AppCommunicateService implements IAppCommunicateService {
                     .responseTimeout(Duration.ofSeconds(3600));
 
             webClient = WebClient.builder()
-                    .baseUrl("https://" + ("localhost:8080".equals(url) ? url : "api." + url))
+                    .baseUrl("http://" + ("localhost:8080".equals(url) ? url : "api." + url))
                     .defaultHeader("Origin", AUTHEN_SERVICE_URL)
                     .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .defaultHeader(HttpHeaders.AUTHORIZATION, jwt)
