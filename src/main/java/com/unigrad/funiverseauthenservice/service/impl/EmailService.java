@@ -132,7 +132,7 @@ public class EmailService implements IEmailService {
                     user.getPersonalMail());
         }
 
-        send(EmailServer.NOTIFICATION, workspace.getName(), user.getPersonalMail(), "Log into Workspace to connect to your University", content);
+        send(EmailServer.SERVICES, workspace.getName(), user.getPersonalMail(), "Log into Workspace to connect to your University", content);
     }
 
     private final String WELCOME_USER = """
