@@ -106,7 +106,7 @@ public class WorkspaceController {
 
         WorkspaceCreateResponse result = dtoConverter.convert(newWorkspace, WorkspaceCreateResponse.class);
         result.setAdmin(dtoConverter.convert(userService.save(admin), WorkspaceCreateResponse.Admin.class));
-//        emailService.sendWelcomeEmail(newWorkspace, admin, "123456");
+        emailService.sendWelcomeEmail(newWorkspace, admin, "123456");
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

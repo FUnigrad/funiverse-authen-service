@@ -3,6 +3,7 @@ package com.unigrad.funiverseauthenservice.service.impl;
 import com.unigrad.funiverseauthenservice.entity.User;
 import com.unigrad.funiverseauthenservice.repository.IUserRepository;
 import com.unigrad.funiverseauthenservice.service.IUserService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,6 +64,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public void inactivate(Long key) {
         userRepository.updateIsActive(key, false);
     }
