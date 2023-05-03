@@ -27,6 +27,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("workspace")
@@ -85,11 +86,13 @@ public class WorkspaceController {
 
         Workspace newWorkspace = workspaceService.save(dtoConverter.convert(workspaceDTO, Workspace.class));
 
+        String password = UUID.randomUUID().toString().substring(0, 10).replaceAll("-", "")    ;
+
         User admin = User.builder()
                 .workspace(newWorkspace)
                 .eduMail(workspaceDTO.getEduMail())
                 .personalMail(workspaceDTO.getPersonalMail())
-                .password(passwordEncoder.encode("123456"))
+                .password(passwordEncoder.encode(password))
                 .role(Role.WORKSPACE_ADMIN)
                 .isActive(true)
                 .build();
@@ -106,7 +109,7 @@ public class WorkspaceController {
 
         WorkspaceCreateResponse result = dtoConverter.convert(newWorkspace, WorkspaceCreateResponse.class);
         result.setAdmin(dtoConverter.convert(userService.save(admin), WorkspaceCreateResponse.Admin.class));
-//        emailService.sendWelcomeEmail(newWorkspace, admin, "123456");
+        emailService.sendWelcomeEmail(newWorkspace, admin, password);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
